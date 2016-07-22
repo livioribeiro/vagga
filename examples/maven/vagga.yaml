@@ -1,0 +1,44 @@
+containers:
+  maven-base:
+    setup:
+    - !Ubuntu xenial
+    - !UbuntuUniverse
+    - !Install [openjdk-8-jdk, maven]
+  maven:
+    setup:
+    - !Container maven-base
+    - !CacheDirs
+      /root/.m2/repository: maven-cache
+    - !EnsureDir /opt/src
+    - !Copy
+      source: /work
+      path: /opt/src
+    - !Sh |
+        cd /opt/src
+        mvn clean package
+    auto-clean: true
+
+  jetty-base:
+    setup:
+    - !Ubuntu xenial
+    - !UbuntuUniverse
+    - !Install [openjdk-8-jre, jetty9]
+
+  jetty:
+    setup:
+    - !Container jetty-base
+    - !Build
+      container: maven
+      source: /opt/src/target/
+      temporary-mount: /tmp/target
+    - !Sh cp /tmp/target/gs-rest-service-0.1.0.war /var/lib/jetty9/webapps/greeter.war
+    volumes:
+      /var/lib/jetty9: !Snapshot { size: 25Mi }
+      /var/log/jetty9: !Snapshot { size: 10Mi }
+
+commands:
+  run: !Command
+    container: jetty
+    description: Run greeter app
+    run: /usr/share/jetty9/bin/jetty.sh run
+
