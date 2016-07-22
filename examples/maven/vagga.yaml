@@ -23,7 +23,6 @@ containers:
     - !Ubuntu xenial
     - !UbuntuUniverse
     - !Install [openjdk-8-jre, jetty9]
-
   jetty:
     setup:
     - !Container jetty-base
@@ -39,6 +38,5 @@ containers:
 commands:
   run: !Command
     container: jetty
-    description: Run greeter app
+    description: Run jetty server
     run: /usr/share/jetty9/bin/jetty.sh run
-
